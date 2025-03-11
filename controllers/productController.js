@@ -69,4 +69,56 @@ const getProductsByIds = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProductByBarcode, getProductsByIds };
+// Lưu sản phẩm vào cơ sở dữ liệu
+const createProduct = async (req, res) => {
+  try {
+    const { title, expiryDate, images } = req.body;
+
+    if (!title || !expiryDate || !Array.isArray(images) || images.length === 0) {
+      return res.status(400).json(createResponse("error", 400, "Thiếu thông tin sản phẩm hoặc danh sách ảnh không hợp lệ!"));
+    }
+
+    const newProduct = new Product({
+      title,
+      expiryDate,
+      images,
+    });
+
+    await newProduct.save();
+
+    console.log(`Sản phẩm đã được lưu: ${newProduct.id}`);
+    res.status(201).json(createResponse("success", 201, "Sản phẩm đã được lưu!", newProduct));
+  } catch (error) {
+    console.error("Lỗi khi lưu sản phẩm:", error);
+    res.status(500).json(createResponse("error", 500, "Lỗi khi lưu sản phẩm!"));
+  }
+};
+
+// Xóa sản phẩm theo ID
+const deleteProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Kiểm tra xem ID có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json(createResponse("error", 400, "ID không hợp lệ!"));
+    }
+
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json(createResponse("error", 404, "Không tìm thấy sản phẩm!"));
+    }
+
+    console.log(`Sản phẩm đã bị xóa: ${id}`);
+    res.status(200).json(createResponse("success", 200, "Xóa sản phẩm thành công!", deletedProduct));
+  } catch (error) {
+    console.error("Lỗi khi xóa sản phẩm:", error);
+    res.status(500).json(createResponse("error", 500, "Lỗi khi xóa sản phẩm!"));
+  }
+};
+
+module.exports = { getProducts, getProductByBarcode, getProductsByIds, createProduct, deleteProductById };
+
+
+
