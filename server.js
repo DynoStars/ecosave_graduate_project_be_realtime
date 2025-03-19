@@ -20,12 +20,12 @@ const io = socketIo(server, {
 app.use(express.json());
 app.use(cors());
 
-// Kết nối Redis
 const redis = new Redis({
-    host: "127.0.0.1",
-    port: 6379
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD,
+    tls: {}  // Nếu Upstash yêu cầu kết nối bảo mật
 });
-
 // Lắng nghe sự kiện từ Laravel qua Redis
 redis.subscribe("products", (err, count) => {
     if (err) {
