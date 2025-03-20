@@ -21,10 +21,10 @@ app.use(express.json());
 app.use(cors());
 
 const redis = new Redis({
-    host: "hkg1.clusters.zeabur.com",
-    port: 32427,
-    password: "PaHBTv3LoDCc0W8J4V5md792F1UXsb6Z",
-
+    host: "novel-bird-36009.upstash.io",
+    port: 6379,
+    password: "AYypAAIjcDE2YTIwYmVjNTlmYWU0NjQ0YTE5Mzg0ODBlMWNlOTgyZXAxMA",
+    tls: {},
 });
 // Lắng nghe sự kiện từ Laravel qua Redis
 redis.subscribe("products", (err, count) => {
