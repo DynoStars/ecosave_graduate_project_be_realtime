@@ -21,10 +21,9 @@ app.use(express.json());
 app.use(cors());
 
 const redis = new Redis({
-    host: "novel-bird-36009.upstash.io",
-    port: 6379,
-    password: "AYypAAIjcDE2YTIwYmVjNTlmYWU0NjQ0YTE5Mzg0ODBlMWNlOTgyZXAxMA",
-    tls: {},
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD,
 });
 // Lắng nghe sự kiện từ Laravel qua Redis
 redis.subscribe("products", (err, count) => {
@@ -44,9 +43,24 @@ redis.psubscribe("private-products", (err, count) => {
 redis.on("message", (channel, message) => {
     console.log(`Nhận sự kiện từ Redis (kênh: ${channel}):`, message);
 
-    const eventData = JSON.parse(message);
-    io.emit("product.created", eventData);
+    try {
+        const parsedMessage = JSON.parse(message);
+        if (parsedMessage.data && parsedMessage.data.command) {
+            const commandData = JSON.parse(parsedMessage.data.command);
+            if (commandData.event && commandData.event.product) {
+                io.emit("product.created", commandData.event.product);
+                console.log("Đã phát sự kiện product.created:", commandData.event.product);
+            } else {
+                console.error("Không tìm thấy dữ liệu sản phẩm trong sự kiện.");
+            }
+        } else {
+            console.error("Dữ liệu Redis không hợp lệ.");
+        }
+    } catch (error) {
+        console.error("Lỗi khi phân tích dữ liệu Redis:", error);
+    }
 });
+
 
 // Routes
 app.use("/api/products", productRoutes);
