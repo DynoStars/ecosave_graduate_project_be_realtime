@@ -21,10 +21,10 @@ app.use(express.json());
 app.use(cors());
 
 const redis = new Redis({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD,
-   
+    host: "hkg1.clusters.zeabur.com",
+    port: 32427,
+    password: "PaHBTv3LoDCc0W8J4V5md792F1UXsb6Z",
+
 });
 // Lắng nghe sự kiện từ Laravel qua Redis
 redis.subscribe("products", (err, count) => {
